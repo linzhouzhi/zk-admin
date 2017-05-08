@@ -33,17 +33,17 @@
 <body>
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. -->
-    <div class="container-fluid">
+    <div class="container">
 
         <div class="navbar-header">
-            <a class="navbar-brand" href="/index"><span class="glyphicon glyphicon-home"></span> Home</a>
+            <a class="navbar-brand" href="/tree/admin"><span class="glyphicon glyphicon-home"></span> Home</a>
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-6">
             <ul class="nav navbar-nav">
-                <li><a href="#">Config-center</a></li>
-                <li><a href="#">HA-service</a></li>
-                <li><a href="#">Timer</a></li>
+                <li class="active"><a href="/tree/config">Config-center</a></li>
+                <li><a href="/tree/ha">HA-service</a></li>
+                <li><a href="/tree/timer">Timer</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
 
@@ -51,12 +51,12 @@
 </nav>
 <div class="clearfix nav-height"></div>
 <div class="container-fluid container-title">
-    <div class="container-fluid container-title-content">
+    <div class="container container-title-content">
         <h1>zk-admin</h1>
         <p>zookeeper admin center</p>
     </div>
 </div>
-<div class="container-fluid">
+<div class="container">
     <div class="row">
         <div class="col-md-3">
             <div class="panel panel-default">
