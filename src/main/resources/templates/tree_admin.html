@@ -22,6 +22,13 @@
         background-color: #fafbfc;
         border-color: #e1e4e8;
     }
+
+    pre {padding: 5px; margin: 5px; }
+    .string { color: green; }
+    .number { color: darkorange; }
+    .boolean { color: blue; }
+    .null { color: magenta; }
+    .key { color: red; }
 </style>
 <body>
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -36,7 +43,6 @@
             <ul class="nav navbar-nav">
                 <li><a href="#">Config-center</a></li>
                 <li><a href="#">HA-service</a></li>
-                <li><a href="#">Service-monitor</a></li>
                 <li><a href="#">Timer</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
@@ -71,7 +77,8 @@
                     <button type="button" class="btn btn-default btn-sm" onclick="demo_delete();"><i class="glyphicon glyphicon-remove"></i> Delete</button>
                     <button type="button" class="btn btn-default btn-sm" onclick="demo_rename();"><i class="glyphicon glyphicon-pencil"></i> Edit</button>
                 </div>
-                <div class="panel-body" style="height:200px">
+                <div class="panel-body">
+                    <pre id="node-detail"></pre>
                 </div>
                 <div class="panel-footer">
                     <button type="button" class="btn btn-default btn-sm">config-center</button>
@@ -83,7 +90,8 @@
 </div><!-- .container-fluid -->
 
 
-<script>
+<script th:inline="JavaScript">
+    /*<![CDATA[*/
     function demo_create() {
         var ref = $('#jstree').jstree(true),
                 sel = ref.get_selected();
@@ -117,29 +125,70 @@
             }, 250);
         });
 
-        $('#jstree')
-                .jstree({
-                    "core" : {
-                        'data' : {
-                            'url' : function (node) {
-                                return node.id === '#' ? '../vender/jstree/ajax_demo_roots.json' : '../vender/jstree/ajax_demo_children.json';
-                            },
-                            'data' : function (node) {
-                                return { 'id' : node.id };
-                            }
-                        }
+        $('#jstree').jstree({
+            "core" : {
+                "animation" : 0,
+                "check_callback" : true,
+                "themes" : { "stripes" : false },
+                'data' : {
+                    'url' : function (node) {
+                        return '/tree/get_all_path_ajax';
                     },
-                    "types" : {
-                        "default" : {
-                            "icon" : "glyphicon glyphicon-flash"
-                        },
-                        "root" : {
-                            "icon" : "glyphicon glyphicon-ok"
-                        }
-                    },
-                    "plugins" : [ "contextmenu", "dnd", "search", "state", "types" ]
-                });
+                    'data' : function (node) {
+                        return { 'id' : node.id };
+                    }
+                }
+            },
+            "types" : {
+                "default" : {
+                    "icon" : "glyphicon glyphicon-flash",
+                    "valid_children" : []
+                },
+                "file" : {
+                    "icon" : "glyphicon glyphicon-flash",
+                    "valid_children" : []
+                },
+                "root" : {
+                    "icon" : "glyphicon glyphicon-ok",
+                    "valid_children" : ["default","file"]
+                }
+            },
+            "plugins" : [ "contextmenu", "search", "state", "types" ]
+        });
+
+
+        $('#jstree').on("changed.jstree", function (e, data) {
+            console.log(data.selected);
+            var path = data.selected[0];
+            $.get("/tree/get_path_detail_ajax?path=" + path,function(data){
+                $("#node-detail").html(syntaxHighlight(data));
+            });
+        });
+
     });
+
+    function syntaxHighlight(json) {
+        if (typeof json != 'string') {
+            json = JSON.stringify(json, undefined, 2);
+        }
+        json = json.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+            var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+    /*]]>*/
 </script>
 </body>
 </html>
