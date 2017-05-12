@@ -9,7 +9,8 @@ import org.junit.Test;
 public class ZKnodeUtilTest {
     @Test
     public void testGetAllPath() throws Exception {
-        JSONObject jsonObject = ZKnodeUtil.getAllPath();
+        String path = "/";
+        JSONObject jsonObject = ZKnodeUtil.getAllPath(path);
         System.out.println( jsonObject );
     }
 }

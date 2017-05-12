@@ -23,7 +23,7 @@
         border-color: #e1e4e8;
     }
 
-    pre {padding: 5px; margin: 5px; }
+    pre {padding: 5px; margin: 0px; margin-bottom: 15px }
     .string { color: green; }
     .number { color: darkorange; }
     .boolean { color: blue; }
@@ -75,14 +75,22 @@
                     <button type="button" class="btn btn-default btn-sm" onclick="demo_create();"><i class="glyphicon glyphicon-plus"></i> Create</button>
                     <button type="button" class="btn btn-default btn-sm" onclick="demo_rename();"><i class="glyphicon glyphicon-erase"></i> Rename</button>
                     <button type="button" class="btn btn-default btn-sm" onclick="demo_delete();"><i class="glyphicon glyphicon-remove"></i> Delete</button>
-                    <button type="button" class="btn btn-default btn-sm" onclick="demo_rename();"><i class="glyphicon glyphicon-pencil"></i> Edit</button>
+                    <button type="button" class="btn btn-default btn-sm" id="save-current-path"><i class="glyphicon glyphicon-ok"></i>save</button>
+                    <button type="button" class="btn btn-default btn-sm" id="save-all-path"><i class="glyphicon glyphicon-saved"></i>save-all</button>
                 </div>
                 <div class="panel-body">
-                    <pre id="node-detail"></pre>
+                    <pre id="node-detail" data-url=""></pre>
+                    <div class="node-value text-value">
+                        <textarea class="form-control node-value" rows="3" id="node-data"></textarea>
+                    </div>
+                    <div class="node-value table-value"></div>
+                    <div class="node-value json-value"></div>
                 </div>
                 <div class="panel-footer">
-                    <button type="button" class="btn btn-default btn-sm">config-center</button>
-                    <button type="button" class="btn btn-default btn-sm">HA-service</button>
+                    <button type="button" class="btn btn-default btn-sm" id="node-table">table</button>
+                    <button type="button" class="btn btn-default btn-sm" id="node-json">json</button>
+                    <button type="button" class="btn btn-default btn-sm" id="node-children-table">children-table</button>
+                    <button type="button" class="btn btn-default btn-sm" id="node-children-json">children-json</button>
                 </div>
             </div>
         </div>
@@ -115,6 +123,41 @@
         if(!sel.length) { return false; }
         ref.delete_node(sel);
     };
+
+    $("#save-current-path").click(function () {
+        var reqdata = {};
+        reqdata.path = $("#node-detail").data("url");
+        reqdata.nodeData = $("#node-data").val();
+        $.ajax({
+            type : "post",
+            contentType: 'application/json',
+            url : "/tree/update_path_data_ajax",
+            data : JSON.stringify(reqdata),
+            dataType:'json',
+            success : function(data){
+                $("#node-detail").html(syntaxHighlight(data["stat"]));
+                $("#node-data").val( JSON.stringify(data["data"]) );
+            }
+        });
+    });
+
+    $("#save-all-path").click(function () {
+        var reqdata = {};
+        reqdata.path = $("#node-detail").data("url");
+        reqdata.nodeData = $("#node-data").val();
+        $.ajax({
+            type : "post",
+            contentType: 'application/json',
+            url : "/tree/update_all_path_data_ajax",
+            data : JSON.stringify(reqdata),
+            dataType:'json',
+            success : function(data){
+                $("#node-detail").html(syntaxHighlight(data["stat"]));
+                $("#node-data").val( JSON.stringify(data["data"]) );
+            }
+        });
+    });
+
     $(function () {
         var to = false;
         $('#demo_q').keyup(function () {
@@ -125,6 +168,10 @@
             }, 250);
         });
 
+        var get_all_url = getUrlParam('path');
+        if( typeof get_all_url == "undefined" || get_all_url == null ){
+            get_all_url = "/";
+        }
         $('#jstree').jstree({
             "core" : {
                 "animation" : 0,
@@ -132,7 +179,7 @@
                 "themes" : { "stripes" : false },
                 'data' : {
                     'url' : function (node) {
-                        return '/tree/get_all_path_ajax';
+                        return '/tree/get_all_path_ajax?path=' + get_all_url;
                     },
                     'data' : function (node) {
                         return { 'id' : node.id };
@@ -160,14 +207,27 @@
         $('#jstree').on("changed.jstree", function (e, data) {
             console.log(data.selected);
             var path = data.selected[0];
+            $("#node-detail").data("url", path);
+            console.log(path);
             $.get("/tree/get_path_detail_ajax?path=" + path,function(data){
-                $("#node-detail").html(syntaxHighlight(data));
+                $("#node-detail").html(syntaxHighlight(data["stat"]));
+                $("#node-data").val( JSON.stringify(data["data"]) );
             });
         });
 
     });
 
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+        var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+        if (r != null) return unescape(r[2]);
+        return null; //返回参数值
+    }
+
     function syntaxHighlight(json) {
+        if( typeof json == 'undefined'){
+            return "";
+        }
         if (typeof json != 'string') {
             json = JSON.stringify(json, undefined, 2);
         }

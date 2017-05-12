@@ -12,10 +12,10 @@ import java.util.List;
 /**
  * Curator framework's client test.
  * Output:
- *  $ create /zktest hello
- *  create /zktest/node1 hello1
- *  create /zktest/node1/nn2 hello1
- *  create /zktest/node1/nn2/user {"username":"linzhouzhi", "age":1}
+ *  $ create /zktest2 hello
+ *  create /zktest2/node1 hello1
+ *  create /zktest2/node1/nn2 hello1
+ *  create /zktest2/node1/nn2/user3 '{"username":"linzhouzhi", "age":1}'
  *  $ ls /
  *  [zktest, zookeeper]
  *  $ get /zktest
