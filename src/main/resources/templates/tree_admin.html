@@ -170,6 +170,13 @@
         if( typeof get_all_url == "undefined" || get_all_url == null ){
             get_all_url = "/";
         }
+        var zk = getUrlParam('zk');
+        if( typeof zk == "undefined" || zk == null ){
+            // cookie 拿，如果没有那就真的没有了
+            zk = "";
+        }else{
+            //写入cookie
+        }
         $('#jstree').jstree({
             "core" : {
                 "animation" : 0,
@@ -177,7 +184,7 @@
                 "themes" : { "stripes" : false },
                 'data' : {
                     'url' : function (node) {
-                        return '/tree/get_all_path_ajax?path=' + get_all_url;
+                        return '/tree/get_all_path_ajax?zk=' + zk + '&path=' + get_all_url;
                     },
                     'data' : function (node) {
                         return { 'id' : node.id };
