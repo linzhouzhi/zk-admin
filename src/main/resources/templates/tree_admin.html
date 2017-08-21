@@ -9,6 +9,7 @@
 <link href="../css/common.css" rel="stylesheet" charset="utf-8" />
 <!-- 4 include the jQuery library -->
 <script src="../vender/jQuery/jquery-2.2.3.min.js"></script>
+<script src="../vender/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
 <!-- 5 include the minified jstree source -->
 <script src="../vender/jstree/dist/jstree.min.js"></script>
 <style>
@@ -29,6 +30,12 @@
     .boolean { color: blue; }
     .null { color: magenta; }
     .key { color: red; }
+    #zk-operate>li>a{
+        padding:1px;
+    }
+    .zk-path{
+        font-weight:bold;
+    }
 </style>
 <body>
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -58,6 +65,7 @@
 </div>
 <div class="container">
     <div class="row">
+
         <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-body">
@@ -72,25 +80,54 @@
         <div class="col-md-9">
             <div class="panel panel-default right-content">
                 <div class="panel-heading">
-                    <button type="button" class="btn btn-default btn-sm" onclick="demo_create();"><i class="glyphicon glyphicon-plus"></i> Create</button>
-                    <button type="button" class="btn btn-default btn-sm" onclick="demo_rename();"><i class="glyphicon glyphicon-erase"></i> Rename</button>
-                    <button type="button" class="btn btn-default btn-sm" onclick="demo_delete();"><i class="glyphicon glyphicon-remove"></i> Delete</button>
-                    <button type="button" class="btn btn-default btn-sm" id="save-current-path"><i class="glyphicon glyphicon-ok"></i>save</button>
-                    <button type="button" class="btn btn-default btn-sm" id="save-all-path"><i class="glyphicon glyphicon-saved"></i>save-all</button>
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-pills" role="tablist" id="zk-operate">
+                        <li role="presentation">
+                            <a href="#create" aria-controls="create" role="tab" data-toggle="tab">
+                                <button type="button" class="btn btn-default btn-sm"><i class="glyphicon glyphicon-plus"></i> Create</button>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#delete" aria-controls="delete" role="tab" data-toggle="tab">
+                                <button type="button" class="btn btn-default btn-sm"><i class="glyphicon glyphicon-remove"></i> Delete</button>
+                            </a>
+                        </li>
+                        <li role="presentation" class="active">
+                            <a href="#update" aria-controls="update" role="tab" data-toggle="tab">
+                                <button type="button" class="btn btn-default btn-sm" ><i class="glyphicon glyphicon-erase"></i> update</button>
+                            </a>
+                        </li>
+                    </ul>
+
                 </div>
                 <div class="panel-body">
-                    <pre id="node-detail" data-url=""></pre>
-                    <div class="node-value text-value">
-                        <textarea class="form-control node-value" rows="3" id="node-data"></textarea>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane" id="create">
+                            <div class="form-group">
+                                parent-path:<span class="zk-path"></span>
+                            </div>
+                            <div class="form-group">
+                                <span>create children node</span>
+                                <input type="text" class="form-control"  placeholder="node1" />
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="delete">
+                            <div class="form-group" style="color:#f50606">
+                                confirm delete the path:<span class="zk-path"></span>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane active" id="update">
+                            <pre><span>stat:</span><span id="node-detail" data-url=""></span><span>data:</span><span id="json-value" class="node-value json-value"></span></pre>
+                            <div class="node-value text-value">
+                                <textarea class="form-control node-value" rows="3" id="node-data"></textarea>
+                            </div>
+                        </div>
                     </div>
                     <div class="node-value table-value"></div>
-                    <div class="node-value json-value"></div>
                 </div>
                 <div class="panel-footer">
-                    <button type="button" class="btn btn-default btn-sm" id="node-table">table</button>
-                    <button type="button" class="btn btn-default btn-sm" id="node-json">json</button>
-                    <button type="button" class="btn btn-default btn-sm" id="node-children-table">children-table</button>
-                    <button type="button" class="btn btn-default btn-sm" id="node-children-json">children-json</button>
+                    <button type="button" class="btn btn-default btn-sm" id="save-current-path"><i class="glyphicon glyphicon-ok"></i> save</button>
                 </div>
             </div>
         </div>
@@ -100,29 +137,6 @@
 
 <script th:inline="JavaScript">
     /*<![CDATA[*/
-    function demo_create() {
-        var ref = $('#jstree').jstree(true),
-                sel = ref.get_selected();
-        if(!sel.length) { return false; }
-        sel = sel[0];
-        sel = ref.create_node(sel, {"type":"file"});
-        if(sel) {
-            ref.edit(sel);
-        }
-    };
-    function demo_rename() {
-        var ref = $('#jstree').jstree(true),
-                sel = ref.get_selected();
-        if(!sel.length) { return false; }
-        sel = sel[0];
-        ref.edit(sel);
-    };
-    function demo_delete() {
-        var ref = $('#jstree').jstree(true),
-                sel = ref.get_selected();
-        if(!sel.length) { return false; }
-        ref.delete_node(sel);
-    };
 
     $("#save-current-path").click(function () {
         var reqdata = {};
@@ -135,23 +149,7 @@
             data : JSON.stringify(reqdata),
             dataType:'json',
             success : function(data){
-                $("#node-detail").html(syntaxHighlight(data["stat"]));
-                $("#node-data").val( JSON.stringify(data["data"]) );
-            }
-        });
-    });
-
-    $("#save-all-path").click(function () {
-        var reqdata = {};
-        reqdata.path = $("#node-detail").data("url");
-        reqdata.nodeData = $("#node-data").val();
-        $.ajax({
-            type : "post",
-            contentType: 'application/json',
-            url : "/tree/update_all_path_data_ajax",
-            data : JSON.stringify(reqdata),
-            dataType:'json',
-            success : function(data){
+                console.log(data);
                 $("#node-detail").html(syntaxHighlight(data["stat"]));
                 $("#node-data").val( JSON.stringify(data["data"]) );
             }
@@ -207,10 +205,12 @@
         $('#jstree').on("changed.jstree", function (e, data) {
             console.log(data.selected);
             var path = data.selected[0];
+            $(".zk-path").text(path);
             $("#node-detail").data("url", path);
             console.log(path);
             $.get("/tree/get_path_detail_ajax?path=" + path,function(data){
                 $("#node-detail").html(syntaxHighlight(data["stat"]));
+                $("#json-value").html(syntaxHighlight(data["data"]));
                 $("#node-data").val( JSON.stringify(data["data"]) );
             });
         });
