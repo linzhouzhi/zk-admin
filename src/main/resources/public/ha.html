@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>zk admin</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="vender/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" charset="utf-8" />
+    <link href="css/common.css" rel="stylesheet" charset="utf-8" />
+
+    <style>
+
+        .checkobj{
+            height: 110px;
+            width: 250px;
+            background-color: #4cae4c;
+            border: 2px solid rgba(0,0,0,.05);
+            border-radius: 5px;
+            margin-right: 9px;
+            margin-bottom: 15px;
+            float: left !important;
+        }
+        .checkobj-content{
+            float: left !important;
+            padding-top: 10px;
+            width: 100%;
+        }
+
+        .remove-checkobj{
+            margin-top: 3px;
+            margin-right: 3px;
+            color: #ffffff;
+            font-size: 22px;
+            float: right !important;
+            cursor: pointer;
+        }
+
+        #add-checkobj{
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. -->
+    <div class="container">
+
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/tree/admin"><span class="glyphicon glyphicon-home"></span> Home</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-6">
+            <ul class="nav navbar-nav">
+                <li><a href="/tree/config">Config-center</a></li>
+                <li class="active"><a href="/tree/ha">HA-service</a></li>
+                <li><a href="/tree/timer">Timer</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+
+    </div>
+</nav>
+<div class="clearfix nav-height"></div>
+<div class="container-fluid container-title">
+    <div class="container-fluid container-title-content">
+        <h1>zk-admin</h1>
+        <p>zookeeper admin center</p>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="checker-content">
+                    <div class="checkobj" id="add-checkobj" style="background-color: #ffffff">
+                        <div class="pull-left checkobj-content">
+                            <span class="glyphicon glyphicon-plus" style="font-size:35px;display:block;width:42px;margin: 0 auto;margin-top: 20px"></span>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- .panel -->
+        </div><!-- .col-md-12 -->
+    </div><!-- .row -->
+</div><!-- .container-fluid -->
+
+<div class="modal fade" id="add-checkobj-model" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <p>content</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- Small modal -->
+<div class="modal fade" id="remove-checkobj-model" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <p>content</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger btn-sm">confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="vender/jQuery/jquery-2.2.3.min.js"></script>
+<script src="vender/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script>
+    var checkTemplete = '<div class="checkobj">' +
+                   '<span class="glyphicon glyphicon-remove-circle remove-checkobj"></span>' +
+                   '<div class="pull-left checkobj-content">{title} : {content}</div>' +
+                   '</div>';
+
+    $("#add-checkobj").click(function(){
+        $('#add-checkobj-model').modal('show');
+        $(this).before( checkTemplete.format({"title":"tttt", "content":'cccc'}) );
+    });
+
+    $(document).on("click",".remove-checkobj", function(){
+        $('#remove-checkobj-model').modal('show');
+        $(this).parent().remove();
+    });
+
+
+    String.prototype.format = function(args) {
+        var result = this;
+        if (arguments.length > 0) {
+            if (arguments.length == 1 && typeof (args) == "object") {
+                for (var key in args) {
+                    if(args[key]!=undefined){
+                        var reg = new RegExp("({" + key + "})", "g");
+                        result = result.replace(reg, args[key]);
+                    }
+                }
+            }
+            else {
+                for (var i = 0; i < arguments.length; i++) {
+                    if (arguments[i] != undefined) {
+                        var reg = new RegExp("({[" + i + "]})", "g");
+                        result = result.replace(reg, arguments[i]);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+</script>
+</html>
