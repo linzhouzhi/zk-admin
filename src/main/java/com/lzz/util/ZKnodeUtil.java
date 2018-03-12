@@ -1,6 +1,6 @@
-package util;
+package com.lzz.util;
 
-import model.ZKnode;
+import com.lzz.model.ZKnode;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
@@ -8,6 +8,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.data.Stat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -82,9 +83,9 @@ public class ZKnodeUtil {
         ZKnode zKnode = new ZKnode();
         zKnode.setId( path );
         zKnode.setText( path );
-        zKnode.setType( "root" );
+        zKnode.setType( "parent" );
         try {
-            getPath( client, zKnode);
+            getPath( client, zKnode, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -92,7 +93,53 @@ public class ZKnodeUtil {
         return jsonObject;
     }
 
-    private static void getPath(CuratorFramework client, ZKnode zKnode) throws Exception {
+    private static void getPath(CuratorFramework client, ZKnode zKnode, Boolean forceAll) throws Exception {
+        String path = zKnode.getId();
+        List<String> childrenNames = client.getChildren().forPath( path );
+        for(int i = 0; i < childrenNames.size(); i++){
+            String childName = childrenNames.get(i);
+            ZKnode childNode = new ZKnode();
+            zKnode.setType("parent");
+            childNode.setText( childName );
+            String childPath = "";
+            if( "/".equals( path ) ){
+                childPath = path + childName;
+            }else{
+                childPath = path + "/" + childName;
+            }
+            childNode.setId( childPath );
+            List<ZKnode> zkChildren = zKnode.getChildren();
+            if( forceAll ){
+                childNode.setText( childName );
+                childNode.setType("file");
+                zkChildren.add( childNode );
+                getPath( client, childNode, true);
+            }else{
+                Stat stat = client.checkExists().forPath( childPath );
+                if( stat.getNumChildren() > 0 ){
+                    childNode.setType("parent");
+                    List<ZKnode> grandson = new ArrayList<>();
+                    grandson.add( new ZKnode(childPath + "/...", "...", "ellipsis"));
+                    childNode.setChildren( grandson );
+                    zkChildren.add( childNode );
+                }else{
+                    if( stat.getEphemeralOwner() != 0 ){
+                        childNode.setType("tmp-leaf");
+                    }else{
+                        childNode.setType("leaf");
+                    }
+                    zkChildren.add( childNode );
+                }
+                if( i > 50 ){
+                    zkChildren.add( new ZKnode(path+ "/...", "...", "ellipsis") );
+                    break;
+                }
+            }
+        }
+    }
+
+
+    private static void getAllPath(CuratorFramework client, ZKnode zKnode) throws Exception {
         String path = zKnode.getId();
         List<String> paths =  client.getChildren().forPath( path );
         for( int i = 0; i < paths.size(); i++ ){
@@ -112,7 +159,7 @@ public class ZKnodeUtil {
             temZknode.setType("file");
             zKnodeChildren.add( temZknode );
             zKnode.setChildren( zKnodeChildren );
-            getPath( client, temZknode);
+            getAllPath( client, temZknode);
         }
     }
 

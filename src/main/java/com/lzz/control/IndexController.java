@@ -1,16 +1,25 @@
-package control;
+package com.lzz.control;
 
 import net.sf.json.JSONObject;
 import org.apache.zookeeper.data.Stat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import util.ZKnodeUtil;
+import com.lzz.util.ZKnodeUtil;
 
 /**
- * Created by lzz on 17/5/8.
+ * Created by lzz on 17/5/7.
  */
-@RestController
-public class TreeRestController {
-    @RequestMapping(value="/tree/get_all_path_ajax", method = RequestMethod.GET)
+@Controller
+public class IndexController {
+    @RequestMapping("/index")
+    public String treeAdmin(Model model) {
+        return "index";
+    }
+
+
+    @RequestMapping(value="/get_all_path_ajax", method = RequestMethod.GET)
+    @ResponseBody
     public JSONObject getAllPath(@RequestParam(value="path", defaultValue="/") String path){
         if( !path.startsWith("/") ){
             return new JSONObject();
@@ -20,7 +29,8 @@ public class TreeRestController {
         return jsonObject;
     }
 
-    @RequestMapping(value="/tree/get_path_detail_ajax", method = RequestMethod.GET)
+    @RequestMapping(value="/get_path_detail_ajax", method = RequestMethod.GET)
+    @ResponseBody
     public JSONObject getPathDetail(@RequestParam(value="path", defaultValue="/") String path){
         if( !path.startsWith("/") ){
             return new JSONObject();
@@ -29,7 +39,8 @@ public class TreeRestController {
         return jsonObject;
     }
 
-    @RequestMapping(value="/tree/update_path_data_ajax", method = RequestMethod.POST)
+    @RequestMapping(value="/update_path_data_ajax", method = RequestMethod.POST)
+    @ResponseBody
     public JSONObject updatePathData(@RequestBody JSONObject requestBody){
         String path = requestBody.getString("path");
         if( !path.startsWith("/") ){
@@ -48,7 +59,8 @@ public class TreeRestController {
         return jsonObject;
     }
 
-    @RequestMapping(value="/tree/update_all_path_data_ajax", method = RequestMethod.POST)
+    @RequestMapping(value="/update_all_path_data_ajax", method = RequestMethod.POST)
+    @ResponseBody
     public JSONObject updateAllPathData(@RequestBody JSONObject requestBody){
         String path = requestBody.getString("path");
         if( !path.startsWith("/") ){
@@ -66,4 +78,5 @@ public class TreeRestController {
         }
         return jsonObject;
     }
+
 }

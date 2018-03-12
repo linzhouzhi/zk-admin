@@ -43,16 +43,8 @@
     <div class="container">
 
         <div class="navbar-header">
-            <a class="navbar-brand" href="/tree/admin"><span class="glyphicon glyphicon-home"></span> Home</a>
+            <a class="navbar-brand" href="/index"><span class="glyphicon glyphicon-home"></span> Home</a>
         </div>
-
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-6">
-            <ul class="nav navbar-nav">
-                <li><a href="/tree/config">Config-center</a></li>
-                <li><a href="/tree/ha">HA-service</a></li>
-                <li><a href="/tree/timer">Timer</a></li>
-            </ul>
-        </div><!-- /.navbar-collapse -->
 
     </div>
 </nav>
@@ -134,127 +126,11 @@
     </div><!-- .row -->
 </div><!-- .container-fluid -->
 
-
+<script src="../js/common.js"></script>
+<script src="../js/index.js"></script>
 <script th:inline="JavaScript">
     /*<![CDATA[*/
 
-    $("#save-current-path").click(function () {
-        var reqdata = {};
-        reqdata.path = $("#node-detail").data("url");
-        reqdata.nodeData = $("#node-data").val();
-        $.ajax({
-            type : "post",
-            contentType: 'application/json',
-            url : "/tree/update_path_data_ajax",
-            data : JSON.stringify(reqdata),
-            dataType:'json',
-            success : function(data){
-                console.log(data);
-                $("#node-detail").html(syntaxHighlight(data["stat"]));
-                $("#node-data").val( JSON.stringify(data["data"]) );
-            }
-        });
-    });
-
-    $(function () {
-        var to = false;
-        $('#demo_q').keyup(function () {
-            if(to) { clearTimeout(to); }
-            to = setTimeout(function () {
-                var v = $('#demo_q').val();
-                $('#jstree').jstree(true).search(v);
-            }, 250);
-        });
-
-        var get_all_url = getUrlParam('path');
-        if( typeof get_all_url == "undefined" || get_all_url == null ){
-            get_all_url = "/";
-        }
-        var zk = getUrlParam('zk');
-        if( typeof zk == "undefined" || zk == null ){
-            // cookie 拿，如果没有那就真的没有了
-            zk = "";
-        }else{
-            //写入cookie
-        }
-        $('#jstree').jstree({
-            "core" : {
-                "animation" : 0,
-                "check_callback" : true,
-                "themes" : { "stripes" : false },
-                'data' : {
-                    'url' : function (node) {
-                        return '/tree/get_all_path_ajax?zk=' + zk + '&path=' + get_all_url;
-                    },
-                    'data' : function (node) {
-                        return { 'id' : node.id };
-                    }
-                }
-            },
-            "types" : {
-                "default" : {
-                    "icon" : "glyphicon glyphicon-flash",
-                    "valid_children" : []
-                },
-                "file" : {
-                    "icon" : "glyphicon glyphicon-flash",
-                    "valid_children" : []
-                },
-                "root" : {
-                    "icon" : "glyphicon glyphicon-ok",
-                    "valid_children" : ["default","file"]
-                }
-            },
-            "plugins" : [ "contextmenu", "search", "state", "types" ]
-        });
-
-
-        $('#jstree').on("changed.jstree", function (e, data) {
-            console.log(data.selected);
-            var path = data.selected[0];
-            $(".zk-path").text(path);
-            $("#node-detail").data("url", path);
-            console.log(path);
-            $.get("/tree/get_path_detail_ajax?path=" + path,function(data){
-                $("#node-detail").html(syntaxHighlight(data["stat"]));
-                $("#json-value").html(syntaxHighlight(data["data"]));
-                $("#node-data").val( JSON.stringify(data["data"]) );
-            });
-        });
-
-    });
-
-    function getUrlParam(name) {
-        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
-        var r = window.location.search.substr(1).match(reg);  //匹配目标参数
-        if (r != null) return unescape(r[2]);
-        return null; //返回参数值
-    }
-
-    function syntaxHighlight(json) {
-        if( typeof json == 'undefined'){
-            return "";
-        }
-        if (typeof json != 'string') {
-            json = JSON.stringify(json, undefined, 2);
-        }
-        json = json.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
-        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
-            var cls = 'number';
-            if (/^"/.test(match)) {
-                if (/:$/.test(match)) {
-                    cls = 'key';
-                } else {
-                    cls = 'string';
-                }
-            } else if (/true|false/.test(match)) {
-                cls = 'boolean';
-            } else if (/null/.test(match)) {
-                cls = 'null';
-            }
-            return '<span class="' + cls + '">' + match + '</span>';
-        });
-    }
     /*]]>*/
 </script>
 </body>

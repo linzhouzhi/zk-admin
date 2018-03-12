@@ -1,6 +1,6 @@
-package util;
+package com.lzz.util;
 
-import model.ZKnode;
+import com.lzz.model.ZKnode;
 import net.sf.json.JSONObject;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;

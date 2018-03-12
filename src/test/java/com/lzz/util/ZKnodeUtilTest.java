@@ -1,4 +1,4 @@
-package util;
+package com.lzz.util;
 
 import net.sf.json.JSONObject;
 import org.junit.Test;

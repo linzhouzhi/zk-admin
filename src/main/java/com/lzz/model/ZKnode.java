@@ -1,4 +1,4 @@
-package model;
+package com.lzz.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,15 @@ public class ZKnode{
     private String text;
     private String type;
     private List<ZKnode> children = new ArrayList<>();
+
+    public ZKnode(){
+
+    }
+    public ZKnode(String id, String text, String type) {
+        this.id = id;
+        this.text = text;
+        this.type = type;
+    }
 
     public String getId() {
         return id;

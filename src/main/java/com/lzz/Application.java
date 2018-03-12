@@ -1,4 +1,4 @@
-package control;
+package com.lzz;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
