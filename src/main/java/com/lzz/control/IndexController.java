@@ -1,11 +1,12 @@
 package com.lzz.control;
 
+import com.lzz.model.NodeDetail;
+import com.lzz.model.ZKParam;
+import com.lzz.util.ZKnodeUtil;
 import net.sf.json.JSONObject;
-import org.apache.zookeeper.data.Stat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.lzz.util.ZKnodeUtil;
 
 /**
  * Created by lzz on 17/5/7.
@@ -20,63 +21,48 @@ public class IndexController {
 
     @RequestMapping(value="/get_all_path_ajax", method = RequestMethod.GET)
     @ResponseBody
-    public JSONObject getAllPath(@RequestParam(value="path", defaultValue="/") String path){
+    public JSONObject getAllPath(@RequestParam String zk,
+                                 @RequestParam(value="path", defaultValue="/") String path){
         if( !path.startsWith("/") ){
             return new JSONObject();
         }
-        JSONObject jsonObject = ZKnodeUtil.getAllPath( path );
+        JSONObject jsonObject = ZKnodeUtil.getAllPath( zk, path );
         System.out.println( jsonObject );
         return jsonObject;
     }
 
     @RequestMapping(value="/get_path_detail_ajax", method = RequestMethod.GET)
     @ResponseBody
-    public JSONObject getPathDetail(@RequestParam(value="path", defaultValue="/") String path){
+    public NodeDetail getPathDetail(@RequestParam String zk,
+                                    @RequestParam(value="path", defaultValue="/") String path){
         if( !path.startsWith("/") ){
-            return new JSONObject();
+            return new NodeDetail();
         }
-        JSONObject jsonObject = ZKnodeUtil.getDetailPath( path );
-        return jsonObject;
+        NodeDetail nodeDetail = ZKnodeUtil.getDetailPath( zk, path );
+        return nodeDetail;
     }
 
-    @RequestMapping(value="/update_path_data_ajax", method = RequestMethod.POST)
+    @RequestMapping(value="/update_node", method = RequestMethod.POST)
     @ResponseBody
-    public JSONObject updatePathData(@RequestBody JSONObject requestBody){
-        String path = requestBody.getString("path");
-        if( !path.startsWith("/") ){
-            return new JSONObject();
-        }
-        JSONObject jsonObject = new JSONObject();
+    public NodeDetail updatePathData(@RequestBody ZKParam zkParam){
+        NodeDetail nodeDetail = new NodeDetail();
         try {
-            Stat stat = ZKnodeUtil.updatePathData(path, requestBody.getString("nodeData"));
-            JSONObject statObject = JSONObject.fromObject(stat);
-            jsonObject.put("stat", statObject);
-            jsonObject.put("data", requestBody.getString("nodeData"));
+            nodeDetail = ZKnodeUtil.updatePathData(zkParam);
         } catch (Exception e) {
-            e.printStackTrace();
-            return jsonObject;
+            nodeDetail.setData( e.getMessage() );
         }
-        return jsonObject;
+        return nodeDetail;
     }
 
-    @RequestMapping(value="/update_all_path_data_ajax", method = RequestMethod.POST)
+    @RequestMapping(value="/delete_node", method = RequestMethod.POST)
     @ResponseBody
-    public JSONObject updateAllPathData(@RequestBody JSONObject requestBody){
-        String path = requestBody.getString("path");
-        if( !path.startsWith("/") ){
-            return new JSONObject();
-        }
-        JSONObject jsonObject = new JSONObject();
+    public boolean deleteNode(@RequestBody ZKParam zkParam){
+        boolean res = true;
         try {
-            Stat stat = ZKnodeUtil.updateAllPathData(path, requestBody.getString("nodeData"));
-            JSONObject statObject = JSONObject.fromObject(stat);
-            jsonObject.put("stat", statObject);
-            jsonObject.put("data", requestBody.getString("nodeData"));
+            res =  ZKnodeUtil.deletePath(zkParam);
         } catch (Exception e) {
-            e.printStackTrace();
-            return jsonObject;
+            res = false;
         }
-        return jsonObject;
+        return res;
     }
-
 }

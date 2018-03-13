@@ -2,27 +2,44 @@
  * Created by lzz on 2018/3/12.
  */
 
-$("#save-current-path").click(function () {
+$("#save-node").click(function () {
     var reqdata = {};
-    reqdata.path = $("#node-detail").data("url");
-    reqdata.nodeData = $("#node-data").val();
+    reqdata.zk = window.zk;
+    reqdata.path = $("#input-path").val();
+    reqdata.data = $("#node-data").val();
     $.ajax({
         type : "post",
         contentType: 'application/json',
-        url : "/update_path_data_ajax",
+        url : "/update_node",
         data : JSON.stringify(reqdata),
         dataType:'json',
         success : function(data){
             console.log(data);
-            $("#node-detail").html(syntaxHighlight(data["stat"]));
-            $("#node-data").val( JSON.stringify(data["data"]) );
+            $("#node-detail").html(syntaxHighlight(data));
+        }
+    });
+});
+
+$("#delete-node").click(function () {
+    var reqdata = {};
+    reqdata.path = $("#input-path").val();
+    reqdata.zk = window.zk;
+    $.ajax({
+        type : "post",
+        contentType: 'application/json',
+        url : "/delete_node",
+        data : JSON.stringify(reqdata),
+        dataType:'json',
+        success : function(data){
+            console.log(data);
+            $("#node-detail").html(syntaxHighlight(data));
         }
     });
 });
 
 $(function () {
     var to = false;
-    $('#demo_q').keyup(function () {
+    $('#search-node').keyup(function () {
         if(to) { clearTimeout(to); }
         to = setTimeout(function () {
             var v = $('#demo_q').val();
@@ -30,16 +47,13 @@ $(function () {
         }, 250);
     });
 
-    var get_all_url = getUrlParam('path');
-    if( typeof get_all_url == "undefined" || get_all_url == null ){
-        get_all_url = "/";
+    var path = getUrlParam('path');
+    if( typeof path == "undefined" || path == null ){
+        path = "/";
     }
     var zk = getUrlParam('zk');
     if( typeof zk == "undefined" || zk == null ){
-        // cookie 拿，如果没有那就真的没有了
-        zk = "";
-    }else{
-        //写入cookie
+        alert("zk is null");
     }
     window.zk = zk;
     $('#jstree').jstree({
@@ -49,7 +63,7 @@ $(function () {
             "themes" : { "stripes" : false },
             'data' : {
                 'url' : function (node) {
-                    return '/get_all_path_ajax?zk=' + window.zk + '&path=' + get_all_url;
+                    return '/get_all_path_ajax?zk=' + window.zk + '&path=' + path;
                 },
                 'data' : function (node) {
                     return { 'id' : node.id };
@@ -58,39 +72,33 @@ $(function () {
         },
         "types" : {
             "default" : {
-                "icon" : "glyphicon glyphicon-flash",
-                "valid_children" : []
+                "icon" : "glyphicon glyphicon-flash"
             },
             "leaf" : {
-                "icon" : "glyphicon glyphicon-flash",
-                "valid_children" : []
+                "icon" : "glyphicon glyphicon-flash"
             },
             "tmp-leaf" : {
-                "icon" : "glyphicon glyphicon-flash",
-                "valid_children" : []
+                "icon" : "glyphicon glyphicon-flash"
             },
             "ellipsis" : {
-                "icon" : "glyphicon glyphicon-flash",
-                "valid_children" : []
+                "icon" : "glyphicon glyphicon-flash"
             },
             "parent" : {
-                "icon" : "glyphicon glyphicon-ok",
-                "valid_children" : ["default","leaf"]
+                "icon" : "glyphicon glyphicon-ok"
             }
         },
-        "plugins" : [ "search","types" ]
+        "plugins" : [ "search","types","state" ]
     });
 
 
     $('#jstree').on("changed.jstree", function (e, data) {
         var path = data.selected[0];
-        $(".zk-path").text(path);
-        $("#node-detail").data("url", path);
+        $("#zk-path").text(path);
+        $("#input-path").val(path);
         console.log(path);
-        $.get("/get_path_detail_ajax?path=" + path,function(data){
-            $("#node-detail").html(syntaxHighlight(data["stat"]));
-            $("#json-value").html(syntaxHighlight(data["data"]));
-            $("#node-data").val( JSON.stringify(data["data"]) );
+        $.get("/get_path_detail_ajax?zk=" + window.zk + "&path=" + path,function(data){
+            $("#node-detail").html(syntaxHighlight(data));
+            $("#node-data").val( JSON.stringify(data["data"], null, 4) );
         });
     });
 

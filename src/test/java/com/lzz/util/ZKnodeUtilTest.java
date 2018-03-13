@@ -1,6 +1,5 @@
 package com.lzz.util;
 
-import net.sf.json.JSONObject;
 import org.junit.Test;
 
 /**
@@ -9,8 +8,6 @@ import org.junit.Test;
 public class ZKnodeUtilTest {
     @Test
     public void testGetAllPath() throws Exception {
-        String path = "/";
-        JSONObject jsonObject = ZKnodeUtil.getAllPath(path);
-        System.out.println( jsonObject );
+        System.out.println(111);
     }
 }
