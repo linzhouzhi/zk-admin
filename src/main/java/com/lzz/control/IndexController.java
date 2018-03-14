@@ -1,6 +1,5 @@
 package com.lzz.control;
 
-import com.lzz.model.NodeDetail;
 import com.lzz.model.ZKParam;
 import com.lzz.util.ZKnodeUtil;
 import net.sf.json.JSONObject;
@@ -33,23 +32,23 @@ public class IndexController {
 
     @RequestMapping(value="/get_path_detail_ajax", method = RequestMethod.GET)
     @ResponseBody
-    public NodeDetail getPathDetail(@RequestParam String zk,
+    public JSONObject getPathDetail(@RequestParam String zk,
                                     @RequestParam(value="path", defaultValue="/") String path){
         if( !path.startsWith("/") ){
-            return new NodeDetail();
+            return new JSONObject();
         }
-        NodeDetail nodeDetail = ZKnodeUtil.getDetailPath( zk, path );
+        JSONObject nodeDetail = ZKnodeUtil.getDetailPath( zk, path );
         return nodeDetail;
     }
 
     @RequestMapping(value="/update_node", method = RequestMethod.POST)
     @ResponseBody
-    public NodeDetail updatePathData(@RequestBody ZKParam zkParam){
-        NodeDetail nodeDetail = new NodeDetail();
+    public JSONObject updatePathData(@RequestBody ZKParam zkParam){
+        JSONObject nodeDetail = new JSONObject();
         try {
             nodeDetail = ZKnodeUtil.updatePathData(zkParam);
         } catch (Exception e) {
-            nodeDetail.setData( e.getMessage() );
+            nodeDetail.put("data", e.getMessage() );
         }
         return nodeDetail;
     }

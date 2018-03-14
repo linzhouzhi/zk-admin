@@ -1,6 +1,5 @@
 package com.lzz.util;
 
-import com.lzz.model.NodeDetail;
 import com.lzz.model.ZKParam;
 import com.lzz.model.ZKnode;
 import net.sf.json.JSONObject;
@@ -27,17 +26,17 @@ public class ZKnodeUtil {
         return client;
     }
 
-    public static NodeDetail getDetailPath(String zk, String path){
+    public static JSONObject getDetailPath(String zk, String path){
         CuratorFramework client = client(zk);
         Stat stat = null;
-        NodeDetail nodeDetail = new NodeDetail();
+        JSONObject nodeDetail = new JSONObject();
         try {
             stat = client.checkExists().forPath( path );
             byte[] datas = client.getData().forPath( path );
-            nodeDetail.setStat(stat);
-            nodeDetail.setData( new String(datas) );
+            nodeDetail.put("stat", stat);
+            nodeDetail.put("data", new String(datas) );
         } catch (Exception e) {
-            nodeDetail.setData( e.getMessage() );
+            nodeDetail.put("data", e.getMessage() );
         }finally {
             client.close();
         }
@@ -45,8 +44,8 @@ public class ZKnodeUtil {
     }
 
 
-    public static NodeDetail updatePathData(ZKParam zKParam) throws Exception {
-        NodeDetail  nodeDetail = new NodeDetail();
+    public static JSONObject updatePathData(ZKParam zKParam) throws Exception {
+        JSONObject  nodeDetail = new JSONObject();
         CuratorFramework client = client( zKParam.getZk() );
         try {
             Stat stat = client.checkExists().forPath( zKParam.getPath() );
@@ -57,8 +56,8 @@ public class ZKnodeUtil {
             }
             Stat resStat = client.checkExists().forPath( zKParam.getPath() );
             byte[] datas = client.getData().forPath( zKParam.getPath() );
-            nodeDetail.setStat( resStat );
-            nodeDetail.setData( new String( datas ) );
+            nodeDetail.put("stat", resStat );
+            nodeDetail.put("data", new String( datas ) );
         }catch (Exception e){
 
         }finally {
